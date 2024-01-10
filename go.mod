@@ -1,3 +1,5 @@
-module github.com/timssDre/mBoxMini.git
+module mBoxMini
 
-go 1.21.3
+go 1.21
+
+require github.com/caarlos0/env/v10 v10.0.0
