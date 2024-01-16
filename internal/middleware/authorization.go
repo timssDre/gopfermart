@@ -20,8 +20,6 @@ const SECRETKEY = "supersecretkey"
 
 func AuthorizationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		path := c.FullPath()
-		fmt.Println(path)
 		userInfo, err := getUserIDFromCookie(c)
 		if err != nil {
 			code := http.StatusInternalServerError
