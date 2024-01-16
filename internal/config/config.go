@@ -18,7 +18,7 @@ type Config struct {
 func InitConfig() *Config {
 	config := &Config{
 		RunAddress:  "localhost:8080",
-		DataBaseURL: "",
+		DataBaseURL: "DataBaseURL null",
 		ASA:         "",
 		LogLevel:    "info",
 	}
