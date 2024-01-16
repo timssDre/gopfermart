@@ -6,7 +6,7 @@ import (
 )
 
 type Repo interface {
-	CreateUser(login, password string) error
+	CreateUser(id, login, password string) error
 	GetUser(login string) (int, error)
 }
 
@@ -25,7 +25,11 @@ func (b *BoxService) GetUser(login string) (int, error) {
 }
 
 func (b *BoxService) CreateUser(user *users.User) error {
-	err := b.db.CreateUser(user.Login, user.Password)
+	hashedPassword, err := user.PasswordStringToHash()
+	if err != nil {
+		return err
+	}
+	err = b.db.CreateUser(user.ID, user.Login, string(hashedPassword))
 	if err != nil {
 		return fmt.Errorf("failed registration user in db  %w", err)
 	}

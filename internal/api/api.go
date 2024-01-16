@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"mBoxMini/internal/logger"
+	"mBoxMini/internal/middleware"
 	"mBoxMini/internal/services"
 	"mBoxMini/repository"
 	"net/http"
@@ -34,6 +35,7 @@ func StartRestAPI(serverAddr string, LogLevel string, db *repository.StoreDB) er
 
 	r.Use(
 		gin.Recovery(),
+		middleware.AuthorizationMiddleware(),
 	)
 	api.setRoutes(r)
 	server := &http.Server{

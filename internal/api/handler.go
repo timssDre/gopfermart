@@ -10,7 +10,21 @@ import (
 var ErrNoRows = errors.New("sql: no rows in result set")
 
 func (s *RestAPI) Registration(c *gin.Context) {
-	user := users.User{}
+	userInfo, exists := c.Get("userInfo")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	userInfoData, ok := userInfo.(*users.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+
+	user := users.User{
+		ID:  userInfoData.ID,
+		New: userInfoData.New,
+	}
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format"})
 		return
@@ -25,5 +39,10 @@ func (s *RestAPI) Registration(c *gin.Context) {
 		return
 	}
 	err = s.BoxService.CreateUser(&user)
-	c.JSON(http.StatusOK, "test")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
