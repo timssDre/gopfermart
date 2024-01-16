@@ -30,8 +30,12 @@ func (s *RestAPI) Registration(c *gin.Context) {
 		return
 	}
 	userID, err := s.BoxService.GetUser(user.Login)
-	if err != nil && !errors.As(err, &ErrNoRows) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	if err != nil {
+		if errors.Is(err, ErrNoRows) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "the user was not found."})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if userID != 0 {

@@ -19,7 +19,7 @@ func NewApp(config *config.Config) *App {
 }
 
 func (a *App) Start() {
-	db, err := repository.InitDatabase(a.config.DataBaseURl)
+	db, err := repository.InitDatabase(a.config.DataBaseURL)
 	if err != nil {
 		log.Fatal(err)
 	}
