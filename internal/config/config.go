@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/caarlos0/env/v10"
 	"net/http"
+	"os"
 )
 
 type Config struct {
@@ -18,7 +19,7 @@ type Config struct {
 func InitConfig() *Config {
 	config := &Config{
 		RunAddress:  "localhost:8080",
-		DataBaseURL: "DataBaseURL null",
+		DataBaseURL: "host=localhost port=5432 user=postgres password=nbvpass dbname=postgres sslmode=disable",
 		ASA:         "",
 		LogLevel:    "info",
 	}
@@ -29,9 +30,10 @@ func InitConfig() *Config {
 	flag.StringVar(&config.LogLevel, "c", config.LogLevel, "log level")
 	flag.Parse()
 
-	//config.DataBaseURL = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5432, "postgres", "nbvpass", "postgres")
+	dbURI := os.Getenv("DATABASE_URI")
+	debugTelegram("DATABASE_URI " + dbURI)
 
-	debugTelegram(config.DataBaseURL)
+	debugTelegram("DATABASE_URIflag " + config.DataBaseURL)
 
 	err := env.Parse(config)
 	if err != nil {
