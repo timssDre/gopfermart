@@ -10,16 +10,18 @@ import (
 )
 
 type Config struct {
-	RunAddress  string `env:"RUN_ADDRESS"`
-	DataBaseURL string `env:"db"`
-	ASA         string `env:"ACCRUAL_SYSTEM_ADDRESS"`
-	LogLevel    string `env:"FLAG_LOG_LEVEL"`
+	RunAddress   string `env:"RUN_ADDRESS"`
+	DataBaseURL  string `env:"db"`
+	ASA          string `env:"ACCRUAL_SYSTEM_ADDRESS"`
+	LogLevel     string `env:"FLAG_LOG_LEVEL"`
+	DATABASE_URL string `env:"database_url"`
 }
 
 func InitConfig() *Config {
+	dataBaseURL := "host=localhost port=5432 user=postgres password=nbvpass dbname=postgres sslmode=disable"
 	config := &Config{
 		RunAddress:  "localhost:8080",
-		DataBaseURL: "host=localhost port=5432 user=postgres password=nbvpass dbname=postgres sslmode=disable",
+		DataBaseURL: dataBaseURL,
 		ASA:         "",
 		LogLevel:    "info",
 	}
@@ -30,10 +32,14 @@ func InitConfig() *Config {
 	flag.StringVar(&config.LogLevel, "c", config.LogLevel, "log level")
 	flag.Parse()
 
-	dbURI := os.Getenv("DATABASE_URI")
-	debugTelegram("DATABASE_URI " + dbURI)
+	if config.DataBaseURL == dataBaseURL {
+		dbURI := os.Getenv("DATABASE_URI")
+		if dbURI != "" {
+			config.DataBaseURL = dbURI
+		}
 
-	debugTelegram("DATABASE_URIflag " + config.DataBaseURL)
+	}
+	debugTelegram("DATABASE_URI flag " + config.DataBaseURL)
 
 	err := env.Parse(config)
 	if err != nil {
