@@ -2,25 +2,22 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io"
 	"mBoxMini/internal/users"
 	"net/http"
-	"strings"
 )
 
-var ErrNoRows = errors.New("sql: no rows in result set")
-
 func (s *RestAPI) Registration(c *gin.Context) {
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка чтения тела запроса"})
-		return
-	}
-	cleanedJSON := strings.ReplaceAll(string(body), "\r\n", "")
-	debugTelegram(cleanedJSON)
+	//body, err := io.ReadAll(c.Request.Body)
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка чтения тела запроса"})
+	//	return
+	//}
+	//cleanedJSON := strings.ReplaceAll(string(body), "\r\n", "")
+	//debugTelegram(cleanedJSON)
 
 	userInfo, exists := c.Get("userInfo")
 	if !exists {
@@ -43,12 +40,11 @@ func (s *RestAPI) Registration(c *gin.Context) {
 	}
 	userID, err := s.BoxService.GetUser(user.Login)
 	if err != nil {
-		if errors.Is(err, ErrNoRows) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "the user was not found."})
+		if !errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+
 	}
 	if userID != 0 {
 		c.JSON(http.StatusConflict, gin.H{"error": "Login already taken"})

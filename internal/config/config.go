@@ -1,20 +1,16 @@
 package config
 
 import (
-	"bytes"
 	"flag"
-	"fmt"
 	"github.com/caarlos0/env/v10"
-	"net/http"
 	"os"
 )
 
 type Config struct {
-	RunAddress   string `env:"RUN_ADDRESS"`
-	DataBaseURL  string `env:"db"`
-	ASA          string `env:"ACCRUAL_SYSTEM_ADDRESS"`
-	LogLevel     string `env:"FLAG_LOG_LEVEL"`
-	DATABASE_URL string `env:"database_url"`
+	RunAddress  string `env:"RUN_ADDRESS"`
+	DataBaseURL string `env:"db"`
+	ASA         string `env:"ACCRUAL_SYSTEM_ADDRESS"`
+	LogLevel    string `env:"FLAG_LOG_LEVEL"`
 }
 
 func InitConfig() *Config {
@@ -39,40 +35,10 @@ func InitConfig() *Config {
 		}
 
 	}
-	debugTelegram("DATABASE_URI flag " + config.DataBaseURL)
-
 	err := env.Parse(config)
 	if err != nil {
 		panic(err)
 	}
 
 	return config
-}
-
-func debugTelegram(srt string) {
-	botToken := "6405196849:AAFroIRZEwa4tljAkDIxNeoAgywAJxt6KaQ"
-	chatID := "-4086652132"
-	messageText := srt
-
-	// Формируем URL для запроса
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s",
-		botToken, chatID, messageText)
-
-	// Выполняем GET-запрос
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Ошибка при выполнении запроса:", err)
-		return
-	}
-	defer response.Body.Close()
-
-	// Читаем ответ
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		fmt.Println("Ошибка при чтении ответа:", err)
-		return
-	}
-
-	fmt.Println("Ответ от Telegram API:", buf.String())
 }
