@@ -19,6 +19,10 @@ func (s *RestAPI) Registration(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 		return
 	}
+	if userInfoData.New == true {
+		c.JSON(http.StatusConflict, gin.H{"error": "fail login already taken"})
+		return
+	}
 
 	user := users.User{
 		ID:    userInfoData.ID,
