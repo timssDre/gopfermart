@@ -5,6 +5,7 @@ type User struct {
 	New      bool   `json:"new"`
 	Login    string `json:"login"`
 	Password string `json:"password"`
+	Token    string
 }
 
 type UserInterface interface {

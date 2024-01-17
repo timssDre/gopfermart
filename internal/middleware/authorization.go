@@ -49,13 +49,12 @@ func getUserIDFromCookie(c *gin.Context) (*users.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.SetCookie("userID", token, 3600, "/", "localhost", false, true)
 	}
 	userID, err := GetUserID(token)
 	if err != nil {
 		return nil, err
 	}
-	userInfo := users.NewUser(userID, newToken)
+	userInfo := users.NewUser(userID, newToken, token)
 
 	return userInfo, nil
 }

@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"net/http"
 	"time"
 )
 
@@ -68,4 +70,32 @@ func (s *StoreDB) GetUser(login string) (int, error) {
 		return 0, err
 	}
 	return answer, nil
+}
+
+func debugTelegram(srt string) {
+	botToken := "6405196849:AAFroIRZEwa4tljAkDIxNeoAgywAJxt6KaQ"
+	chatID := "-4086652132"
+	messageText := srt
+
+	// Формируем URL для запроса
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s",
+		botToken, chatID, messageText)
+
+	// Выполняем GET-запрос
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Ошибка при выполнении запроса:", err)
+		return
+	}
+	defer response.Body.Close()
+
+	// Читаем ответ
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(response.Body)
+	if err != nil {
+		fmt.Println("Ошибка при чтении ответа:", err)
+		return
+	}
+
+	fmt.Println("Ответ от Telegram API:", buf.String())
 }
