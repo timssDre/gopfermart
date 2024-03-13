@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"mBoxMini/internal/users"
 	"net/http"
-	"time"
 )
 
 type StoreDB struct {
@@ -30,46 +30,24 @@ func InitDatabase(DatabasePath string) (*StoreDB, error) {
 	return storeDB, nil
 }
 
-func (s *StoreDB) CreateUser(id, login, password string) error {
-	tx, err := s.db.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to start transaction: %w", err)
-	}
-	defer func() {
-		if err != nil {
-			if err = tx.Rollback(); err != nil {
-				err = fmt.Errorf("failed to rollback to transaction %w", err)
-			}
-			return
-		}
-		if err = tx.Commit(); err != nil {
-			err = fmt.Errorf("failed to commit transaction %w", err)
-		}
-	}()
+func (s *StoreDB) CreateUser(id int, login, password string) error {
 	queryUsers := `INSERT INTO users (login, password) VALUES ($1,$2) RETURNING ID`
 	var userID int
-	err = s.db.QueryRow(queryUsers, login, password).Scan(&userID)
-	if err != nil {
-		return fmt.Errorf("requers execution error: %w", err)
-	}
-
-	query := `INSERT INTO tokens (user_id, token, expiration_time) VALUES ($1,$2, $3)`
-	expirationTime := time.Now().Add(time.Hour * 24)
-	_, err = s.db.Exec(query, userID, id, expirationTime)
+	err := s.db.QueryRow(queryUsers, login, password).Scan(&userID)
 	if err != nil {
 		return fmt.Errorf("requers execution error: %w", err)
 	}
 	return nil
 }
 
-func (s *StoreDB) GetUser(login string) (int, error) {
-	query := `SELECT id FROM users WHERE login=$1`
-	var answer int
-	err := s.db.QueryRow(query, login).Scan(&answer)
+func (s *StoreDB) GetUser(login string) (*users.User, error) {
+	queryUser := `SELECT id, login, password FROM users WHERE login=$1`
+	var user users.User
+	err := s.db.QueryRow(queryUser, login).Scan(&user.ID, &user.Login, &user.Password)
 	if err != nil {
-		return 0, err
+		return &user, err
 	}
-	return answer, nil
+	return &user, nil
 }
 
 func debugTelegram(srt string) {

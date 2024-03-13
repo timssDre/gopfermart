@@ -6,8 +6,8 @@ import (
 )
 
 type Repo interface {
-	CreateUser(id, login, password string) error
-	GetUser(login string) (int, error)
+	CreateUser(id int, login, password string) error
+	GetUser(login string) (*users.User, error)
 }
 
 type BoxService struct {
@@ -20,7 +20,7 @@ func NewBoxService(db Repo) *BoxService {
 	}
 }
 
-func (b *BoxService) GetUser(login string) (int, error) {
+func (b *BoxService) GetUser(login string) (*users.User, error) {
 	return b.db.GetUser(login)
 }
 
@@ -29,7 +29,7 @@ func (b *BoxService) CreateUser(user *users.User) error {
 	if err != nil {
 		return err
 	}
-	err = b.db.CreateUser(user.ID, user.Login, string(hashedPassword))
+	err = b.db.CreateUser(user.ID, user.Login, hashedPassword)
 	if err != nil {
 		return fmt.Errorf("failed registration user in db  %w", err)
 	}
